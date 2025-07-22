@@ -1,0 +1,108 @@
+import csv
+import datetime
+import matplotlib.pyplot as plt
+
+class Glucometer:
+    def __init__(self, data_file="glucose_readings.csv"):
+        self.data_file = data_file
+        self.readings = []
+        self.load_data()
+
+    def load_data(self):
+        """Load existing glucose readings from CSV file."""
+        try:
+            with open(self.data_file, mode='r') as file:
+                reader = csv.DictReader(file)
+                self.readings = [
+                    {"timestamp": row["timestamp"], "glucose": float(row["glucose"])}
+                    for row in reader
+                ]
+        except FileNotFoundError:
+            self.readings = []
+
+    def save_data(self, glucose):
+        """Save a new glucose reading to CSV file."""
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(self.data_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            if not self.readings:  # Write header if file is new
+                writer.writerow(["timestamp", "glucose"])
+            writer.writerow([timestamp, glucose])
+        self.readings.append({"timestamp": timestamp, "glucose": glucose})
+
+    def add_reading(self, glucose):
+        """Add a new glucose reading and check for alerts."""
+        if not isinstance(glucose, (int, float)) or glucose < 0:
+            print("Error: Invalid glucose reading.")
+            return
+        self.save_data(glucose)
+        print(f"Glucose reading added: {glucose} mg/dL at {self.readings[-1]['timestamp']}")
+        self.check_alerts(glucose)
+
+    def check_alerts(self, glucose):
+        """Check for hypo/hyperglycemia and display alerts."""
+        if glucose < 70:
+            print("ALERT: Hypoglycemia detected! Glucose level is too low (<70 mg/dL).")
+        elif glucose > 180:
+            print("ALERT: Hyperglycemia detected! Glucose level is too high (>180 mg/dL).")
+        else:
+            print("Glucose level is within normal range.")
+
+    def show_stats(self):
+        """Display statistics of glucose readings."""
+        if not self.readings:
+            print("No readings available.")
+            return
+        glucose_values = [reading["glucose"] for reading in self.readings]
+        avg_glucose = sum(glucose_values) / len(glucose_values)
+        print(f"Total Readings: {len(glucose_values)}")
+        print(f"Average Glucose: {avg_glucose:.1f} mg/dL")
+        print(f"Min Glucose: {min(glucose_values):.1f} mg/dL")
+        print(f"Max Glucose: {max(glucose_values):.1f} mg/dL")
+
+    def plot_trend(self):
+        """Plot glucose readings over time."""
+        if not self.readings:
+            print("No data to plot.")
+            return
+        timestamps = [reading["timestamp"] for reading in self.readings]
+        glucose_values = [reading["glucose"] for reading in self.readings]
+        plt.plot(timestamps, glucose_values, marker='o')
+        plt.axhline(y=70, color='r', linestyle='--', label='Hypoglycemia Threshold (70)')
+        plt.axhline(y=180, color='r', linestyle='--', label='Hyperglycemia Threshold (180)')
+        plt.xlabel("Timestamp")
+        plt.ylabel("Glucose (mg/dL)")
+        plt.title("Glucose Level Trend")
+        plt.xticks(rotation=45)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+def main():
+    glucometer = Glucometer()
+    while True:
+        print("\nGlucometer Menu:")
+        print("1. Add new glucose reading")
+        print("2. Show statistics")
+        print("3. Plot glucose trend")
+        print("4. Exit")
+        choice = input("Enter choice (1-4): ")
+        
+        if choice == "1":
+            try:
+                glucose = float(input("Enter glucose reading (mg/dL): "))
+                glucometer.add_reading(glucose)
+            except ValueError:
+                print("Error: Please enter a valid number.")
+        elif choice == "2":
+            glucometer.show_stats()
+        elif choice == "3":
+            glucometer.plot_trend()
+        elif choice == "4":
+            print("Exiting Glucometer.")
+            break
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main()
