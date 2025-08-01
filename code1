@@ -1,0 +1,18 @@
+  if choice == "1":
+            try:
+                glucose = float(input("Enter glucose reading (mg/dL): "))
+                glucometer.add_reading(glucose)
+            except ValueError:
+                print("Error: Please enter a valid number.")
+        elif choice == "2":
+            glucometer.show_stats()
+        elif choice == "3":
+            glucometer.plot_trend()
+        elif choice == "4":
+            print("Exiting Glucometer.")
+            break
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main()
