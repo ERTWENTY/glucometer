@@ -1,0 +1,9 @@
+def main():
+    glucometer = Glucometer()
+    while True:
+        print("\nGlucometer Menu:")
+        print("1. Add new glucose reading")
+        print("2. Show statistics")
+        print("3. Plot glucose trend")
+        print("4. Exit")
+        choice = input("Enter choice (1-4): ")
